@@ -1,0 +1,98 @@
+
+
+
+
+name: 指定站点有效性检测
+
+on:
+  push:
+    branches: [master, main]
+
+  #手动执行任务
+  workflow_dispatch:
+
+  schedule:
+    #每天10:00执行一次
+    - cron: '0 10 * * *'
+    
+
+# permissions: write-all
+permissions:
+  contents: write
+  pull-requests: write
+
+  
+jobs:
+  Check:
+    runs-on: macos-latest
+    env:
+       TZ: Asia/Shanghai
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        
+      # - name: Setup Swift 
+      #   uses: SwiftyLab/setup-swift@latest
+      #   with:
+      #     swift-version: "5.10.1"
+
+      # # 注意：Ubuntu 22.04目前自带了Swift 6.2，所有要使用其它指定版本的Swift时，需要现在下载对应的Swift，然后再设置LD_LIBRARY_PATH才能正常使用
+      # #      配置指定Swift版本时可以先将其中的usr目录软链接到，用户自定义目录：/opt/swift/current/
+      # #      如果是使用最新的Swift版本则只需要指定Ubuntu版本，然后再设置默认的LD_LIBRARY_PATH即可
+      # # 警告：
+      # #      在每个run任务中执行Swift程序时，都需要再设置一次LD_LIBRARY_PATH，否则Swift程序运行时将找不到动态库
+      # #
+      # # 修正：
+      # #    0. 使用runner-image Ubuntu 22.04自带的版本Swift默认安装路径，配置LD_LIBRARY_PATH的方法示例 - 只需要和自己创建的软连接路径区分即可
+      # #     export PATH=/usr/share/swift/usr/bin:"${PATH}"
+      # #     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/share/swift/usr/lib/
+      # #     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/share/swift/usr/lib/swift/linux/
+      # #
+      # #    1. 使用原来旧的方法每个setp任务都重复导入LD_LIBRARY_PATH配置 - 该方法已被弃用
+      # #    mkdir -p /opt/swift/current/
+      # #    ln -s /opt/hostedtoolcache/swift-5.7.3-RELEASE-ubuntu2204/5.7.3/x86_64/usr /opt/swift/current/
+      # #    export PATH=/opt/swift/current/usr/bin:"${PATH}"
+      # #    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/swift/current/usr/lib/
+      # #    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/swift/current/usr/lib/swift/linux/
+      # #
+      # #    2. 直接将LD_LIBRARY_PATH写入Github EVN环境变量中 - ✅推荐使用✅
+      # #    mkdir -p /opt/swift/current/
+      # #    ln -sf /opt/hostedtoolcache/swift-5.7.3-RELEASE-ubuntu2204/5.7.3/x86_64/usr /opt/swift/current/
+      # #    echo "/opt/swift/current/usr/bin:" >> $GITHUB_PATH
+      # #    echo "LD_LIBRARY_PATH=/opt/swift/current/usr/lib:/opt/swift/current/usr/lib/swift/linux" >> $GITHUB_ENV
+      # #
+      # - name: 配置Swift LD_LIBRARY_PATH动态库路径参, 使用自定义的Swift 5.10.1 版本 
+      #   run: |
+      #     set +e
+      #     echo "which swift"
+      #     which swift
+      #     echo "设置Swift动态库路径......"
+      #     mkdir -p /opt/swift/current/
+      #     ln -sf /opt/hostedtoolcache/swift-5.10.1-RELEASE-ubuntu2204/5.10.1/x86_64/usr /opt/swift/current/
+      #     echo "/opt/swift/current/usr/bin" >> $GITHUB_PATH
+      #     echo "LD_LIBRARY_PATH=/opt/swift/current/usr/lib:/opt/swift/current/usr/lib/swift/linux" >> $GITHUB_ENV
+      #     echo "Swift环境变量更新成功！"
+      #     echo "which swift"
+      #     which swift
+      #     swift -version
+      #     set -e
+
+
+
+      - name: "站点有效性检测"
+        run: |
+          set +e
+          domains/DomainConnectivityCheck/main.sh
+          set -e
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,57 @@
+
+
+
+
+name: 指定站点有效性检测
+
+on:
+  push:
+    branches: [master, main]
+
+  #手动执行任务
+  workflow_dispatch:
+
+  schedule:
+    #每天10:00执行一次
+    - cron: '0 10 * * *'
+    
+
+# permissions: write-all
+permissions:
+  contents: write
+  pull-requests: write
+
+  
+jobs:
+  Check:
+    runs-on: ubuntu-22.04
+    env:
+       TZ: Asia/Shanghai
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        
+
+
+
+
+      - name: "自带Swift版本测试"
+        run: |
+          set +e
+          echo "which swift:"
+          which swift
+          echo "swift -version:"
+          swift -version
+          set -e
+
+
+
+
+
+
+
+
+
+
+
+

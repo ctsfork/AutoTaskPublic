@@ -1,0 +1,97 @@
+DNSHE免费域名：dnshe.com
+
+文档地址：
+https://my.dnshe.com/knowledgebase
+
+
+
+API密钥
+秘钥名称(站点显示)：免费续期
+
+API Key：
+cfsd_6c4ae712860ed64997117bc31287963e
+
+API Secret：
+94440c11152d32ac2239658b2ee6659cd87ddffc08bb2a88da49ee3e56dee2d1
+
+API地址：
+`https://api005.dnshe.com/index.php?m=domain_hub`
+
+
+curl -X GET "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=list" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "X-API-Secret: YOUR_API_SECRET"
+
+
+## 获取所有子域名
+curl -X GET "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=list" \
+  -H "X-API-Key: cfsd_6c4ae712860ed64997117bc31287963e" \
+  -H "X-API-Secret: 94440c11152d32ac2239658b2ee6659cd87ddffc08bb2a88da49ee3e56dee2d1"
+
+
+
+
+
+
+## 续期子域名 - subdomain_id：子域名的ID，可以从获取所有子域名列表中获取
+curl -X POST "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=renew" \
+-H "X-API-Key: cfsd_xxxxxxxxxx" \
+-H "X-API-Secret: yyyyyyyyyyyy" \
+-H "Content-Type: application/json" \
+-d '{
+  "subdomain_id": 3
+}'
+
+## 响应示例：
+{
+  "success": true,
+  "message": "Subdomain renewed successfully (charged 9.90 credit)",
+  "subdomain_id": 3,
+  "subdomain": "myapp",
+  "previous_expires_at": "2025-05-01 00:00:00",
+  "new_expires_at": "2026-05-01 00:00:00",
+  "renewed_at": "2025-04-10 12:34:56",
+  "never_expires": 0,
+  "status": "active",
+  "remaining_days": 366,
+  "charged_amount": 9.9
+}
+
+## 说明：
+`charged_amount` 表示本次续期从用户账户余额中扣除的金额。免费续期或扣费金额为 0 时，该字段值为 `0`。
+## 可能的错误：
+`403 renewal disabled`：后台未配置有效的注册年限。
+`422 renewal not yet available`：尚未进入免费续期窗口（同时返回 `error_code=renewal_not_yet_available` 与剩余时间字段）。
+`403 redemption period requires administrator`：域名处于赎回期且后台配置为人工处理。
+`403 renewal window expired`：已超过续期宽限期。
+`402 insufficient balance for redemption renewal`：赎回期设置为自动扣费，但账户余额不足。
+`404 subdomain not found`：找不到对应子域名或不属于当前 API Key。
+
+## 错误响应示例（可能不全）：
+{
+  "error": "域名尚未进入可续期时间窗口",
+  "seconds_until_window": 15981687,
+  "days_until_window": 185,
+  "error_code": "renewal_not_yet_available",
+  "message": "域名尚未进入可续期时间窗口",
+  "success": false,
+  "details": {
+    "seconds_until_window": 15981687,
+    "days_until_window": 185
+  }
+}
+## 判断操作是否成功总结：
+success： true操作成功   false操作失败
+message：具体的消息提示
+不检查HTTP状态码(响应200肯定是成功的)
+
+
+
+
+
+
+
+
+
+
+
