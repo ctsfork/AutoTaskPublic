@@ -2,7 +2,7 @@
 
 
 
-name: Linux Swift
+name: Test Linux Swift
 
 on:
   # push:
