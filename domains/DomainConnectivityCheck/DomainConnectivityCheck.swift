@@ -31,6 +31,11 @@ struct DomainConnectivityCheck{
 
 
 class DomainCheck{
+    /**
+     是否打印响应数据，包括：状态码，request，response
+     */
+    public static var isLog = false
+    
     let ulrs = [
         "https://cts-vapor-shulker.itunnel.cc.cd/health",
         "https://ctsserver-shulker.itunnel.cc.cd/health"
@@ -42,29 +47,39 @@ class DomainCheck{
         msg = ""
         start()
         push()
+        
     }
     
     
     private func check(url:String){
         Network.get(url: url ) { resultData, statusCode, request, response in
             print("statusCode:\(statusCode)")
-            print("request:\(String(describing:request))")
-            print("response:\(String(describing:response))")
-            print("resultData:\(String(describing:resultData))")
+            
+            if Self.isLog {
+                print("request:\(String(describing:request))")
+                print("response:\(String(describing:response))")
+                print("resultData:\(String(describing:resultData))")
+            }
+
             
             if let resultData, let str = String(data: resultData, encoding: .utf8) {
-                print("resultString:\( str ))")
+                if Self.isLog {
+                    print("resultString:\( str ))")
+                }
             }
 
             /**
              200：响应成功
              403：GitHub Action中访问Cloudflare托管的站点，会出现Just a moment...
+             // && statusCode != 403
              */
-            if statusCode != 200 && statusCode != 403 {
-                self.msg += "站点:\(url) 无法访问" + "\n"
+            if statusCode == 200  {
+//                self.msg += "站点:\(url) 无法访问" + "\n"
+                self.msg += "站点:\(url) 状态码非200" + "\n"
             }
         } fail: { error, request in
-            self.msg += "站点:\(url) 测试失败" + "\n"
+//            self.msg += "站点:\(url) 测试失败" + "\n"
+            self.msg += "站点:\(url) 无法访问" + "\n"
         }
     }
     
@@ -96,9 +111,12 @@ class DomainCheck{
         print("推送通知:")
         
         
-        PushBark.bark_send(title: title, subtitle: subTitle, body: body, group: group)
-        PushBark.serverChan_send(title: title, short:subTitle, desp: body, tags:group)
-        PushBark.pushdeer_send(text: title , desp: body, type:"markdown")
+        //获取环境变量
+        PushBark_Github.setupEnvironment()
+        
+        PushBark_Github.bark_send(title: title, subtitle: subTitle, body: body, group: group)
+        PushBark_Github.serverChan_send(title: title, short:subTitle, desp: body, tags:group)
+        PushBark_Github.pushdeer_send(text: title , desp: body, type:"markdown")
     }
     
     

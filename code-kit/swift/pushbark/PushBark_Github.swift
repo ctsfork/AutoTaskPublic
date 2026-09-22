@@ -1,3 +1,10 @@
+//
+//  PushBark_Github.swift
+//  
+//
+//  Created by kimi on 2026/9/22.
+//
+
 import Foundation
 
 #if canImport(FoundationNetworking)
@@ -12,11 +19,17 @@ import CoreFoundation
 
 
 /**
- 推送消息发送管理，支持平台：
+ 推送消息发送管理（Github版本），支持平台：
  - Bark：只支持iOS平台，并且持续更新。 -  如果支持用iPhone设备则推荐使用这个。
  - Server酱³：支持iOS/Android平台，并且持续更新。
  - Server酱Turbo：只要集成其它平台，比如默认就是微信公众号接收通知。
  - PushDeer：支持iOS/Android平台，但是代码已经不更新了。
+ 
+ 
+ ⚠️关于Github版本：
+ GitHub版和普通版的区别就是：
+ 1. GitHub版将普通版中的敏感数据放在了环境变量中，运行时先从环境变量中获取并配置数据。
+ 2. 获取环境变量时会使用EnvManager.swift
  
  
  下载地址：
@@ -37,7 +50,7 @@ import CoreFoundation
  
  PS: 该工具可用于Swift脚本运行
  */
-class PushBark
+class PushBark_Github
 {
     
 //MARK: - Server酱
@@ -45,16 +58,16 @@ class PushBark
      Server酱³请求API URL
      https://[uid].push.ft07.com/send/[SendKey].send
      这个URL是由https://sc3.ft07.com/平台生成的。
-     其中：27862和sctp27862t3xrzpfkq3ar1elqoqvepmq是对应的uid和sendKey
+     其中：27862和sctp278lqoqvepmq是对应的uid和sendKey
      */
-    static let sc3API = "https://27862.push.ft07.com/send/sctp27862t3xrzpfkq3ar1elqoqvepmq.send"
+    static var sc3API = ""
     
     /**
      Server酱Turbo请求API URL
      https://sctapi.ftqq.com/<SendKey>.send
      SENDKEY: 由https://sct.ftqq.com/平台生成
      */
-    static let scTurboAPI = "https://sctapi.ftqq.com/SCT423785TA-X1bty3YNGvNMnvxnUklNs6Sh.send"
+    static var scTurboAPI = ""
     
     
     
@@ -107,7 +120,17 @@ class PushBark
         let semaphore = DispatchSemaphore(value: 0)
         var result = ""
         
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        
+#if canImport(FoundationNetworking)
+        let cfg = URLSessionConfiguration.ephemeral
+        cfg.timeoutIntervalForRequest = 15
+        let session = URLSession(configuration: cfg)
+#else
+        let session = URLSession.shared
+#endif
+        
+        
+        let task = session.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 print("Server酱 Error: \(error)")
             } else if let data = data {
@@ -129,7 +152,7 @@ class PushBark
     /**
      PushDeer消息发送API URL，其中的pushkey在PushDeer App中获取。
      */
-    static let pushDeerAPI = "https://api2.pushdeer.com/message/push?pushkey=PDU43817T3rZXmb4JrkM7MfXN5gDIMswdfNyeVLuo"
+    static var pushDeerAPI = ""
     
     /**
      功能：PushDeer推送服务，接收消息时需要再手机上安装[PushDeer App] - 同时支持iOS/Android；但是Android已经停止更新，iOS版也比较老旧了。
@@ -181,7 +204,17 @@ class PushBark
         let semaphore = DispatchSemaphore(value: 0)
         var result = ""
         
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        
+#if canImport(FoundationNetworking)
+        let cfg = URLSessionConfiguration.ephemeral
+        cfg.timeoutIntervalForRequest = 15
+        let session = URLSession(configuration: cfg)
+#else
+        let session = URLSession.shared
+#endif
+        
+        
+        let task = session.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 print("PushDeer Error: \(error)")
             } else if let data = data {
@@ -204,7 +237,7 @@ class PushBark
     /**
      Bark消息发送API URL - key（在Bark App中获取）直接放在URL中，并且只能推送一个设备。
      */
-    static let barkAPI = "https://api.day.app/ZYRfwyL2BqHDQmxtKQJ6q9"
+    static var barkAPI = ""
     
     /**
      Bark消息发送API URL - key（在Bark App中获取）放在Body参数中。并且可以推送多个设备。
@@ -212,10 +245,10 @@ class PushBark
      - device_key：只推送一个设备
      - device_keys：推送多个设备，公共服务器一次最多 10 个设备，自建服务器无上限。
      */
-    static let barkAPIs = "https://api.day.app/push"
+    static var barkAPIs = ""
     /** 推送设备的key数组 */
-    static let barkKeys = [
-        "ZYRfwyL2BqHDQmxtKQJ6q9"
+    static var barkKeys = [
+        ""
     ]
     
     /**
@@ -320,7 +353,17 @@ class PushBark
         let semaphore = DispatchSemaphore(value: 0)
         var result = ""
         
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        
+#if canImport(FoundationNetworking)
+        let cfg = URLSessionConfiguration.ephemeral
+        cfg.timeoutIntervalForRequest = 15
+        let session = URLSession(configuration: cfg)
+#else
+        let session = URLSession.shared
+#endif
+        
+        
+        let task = session.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 print("Bark Error: \(error)")
             } else if let data = data {
@@ -335,9 +378,69 @@ class PushBark
         return result
     }
     
-    
-    
+}
 
+
+
+
+//MARK: - EnvManager
+extension PushBark_Github{
+    /**
+     读取环境变量中的配置信息 - 使用Github版时必须先执行这个方法
+     */
+    static func setupEnvironment(){
+        print("从环境变量中读取配置......")
+        
+        //Server酱
+        let PushBark_sc3API = EnvManager.shared.getString(name: "PushBark_sc3API")
+        
+        // PushDeer
+        let PushBark_pushDeerAPI = EnvManager.shared.getString(name: "PushBark_pushDeerAPI")
+        
+        // Bark
+        let PushBark_barkAPIs = EnvManager.shared.getString(name: "PushBark_barkAPIs")
+        let PushBark_barkKeys = EnvManager.shared.getArrayString(name: "PushBark_barkKeys")
+        
+        
+        
+        if let PushBark_sc3API {
+            self.sc3API = PushBark_sc3API
+        }else{
+            print("❌PushBark Environment - PushBark_sc3API❌：Server酱³ 请求API获取失败")
+        }
+        
+        if let PushBark_pushDeerAPI {
+            self.pushDeerAPI = PushBark_pushDeerAPI
+        }else{
+            print("❌PushBark Environment - PushBark_pushDeerAPI❌：PushDeer 请求API获取失败")
+        }
+        
+        
+        if let PushBark_barkAPIs {
+            self.barkAPIs = PushBark_barkAPIs
+        }else{
+            print("❌PushBark Environment - PushBark_barkAPIs❌：Bark 请求API获取失败")
+        }
+        if let PushBark_barkKeys {
+            self.barkKeys = PushBark_barkKeys
+        }else{
+            print("❌PushBark Environment - PushBark_barkKeys❌：Bark 推送设备keys数组获取失败")
+        }
+        
+    }
+    
+    
+    /**
+     打印配置环境变量后的数据
+     */
+    static func printEnvironment(){
+        print("self.sc3API:\(self.sc3API)")
+        print("self.pushDeerAPI:\(self.pushDeerAPI)")
+        print("self.barkAPIs:\(self.barkAPIs)")
+        print("self.barkKeys:\(self.barkKeys)")
+
+    }
+    
 }
 
 
@@ -345,8 +448,10 @@ class PushBark
 
 
 
+
+
 //MARK: - Test
-extension PushBark{
+extension PushBark_Github{
     
     static func testServer酱3(){
         let ret = serverChan_send(title: "主人服务器宕机了 via swift", short:"推送消息的简短描述不会在点开通知中显示", desp: "内容第一行\n\n内容第二行",  tags:"CTSServer")
@@ -368,9 +473,11 @@ extension PushBark{
 
 
 
-//PushBark.testServer酱3()
-//PushBark.testPushDeer()
-//PushBark.testBark()
+
+
+//PushBark_Github.testServer酱3()
+//PushBark_Github.testPushDeer()
+//PushBark_Github.testBark()
 
 
 
@@ -409,3 +516,4 @@ extension PushBark{
     2. swiftc命令后的swift文件是无序的，但是需要提供一个程序入口
  
  */
+

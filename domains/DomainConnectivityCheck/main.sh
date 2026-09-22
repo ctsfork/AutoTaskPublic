@@ -36,7 +36,7 @@ cd "${SCRIPT_DIR}"
 
 ## 编译
 # echo "编译......"
-swiftc DomainConnectivityCheck.swift ../pushbark/PushBark.swift ../pushbark/Network.swift -o DomainConnectivityCheck
+swiftc DomainConnectivityCheck.swift ../../code-kit/swift/pushbark/PushBark_Github.swift ../../code-kit/swift/core/*.swift -o DomainConnectivityCheck
 
 
 
