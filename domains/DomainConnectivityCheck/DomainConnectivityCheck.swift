@@ -73,7 +73,7 @@ class DomainCheck{
              403：GitHub Action中访问Cloudflare托管的站点，会出现Just a moment...
              // && statusCode != 403
              */
-            if statusCode == 200  {
+            if statusCode != 200  {
 //                self.msg += "站点:\(url) 无法访问" + "\n"
                 self.msg += "站点:\(url) 状态码非200" + "\n"
             }
