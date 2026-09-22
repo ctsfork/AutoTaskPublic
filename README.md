@@ -12,6 +12,10 @@
 `EnvManager.swift`，`Network.swift` 和`PushBark_Github.swift`文件。
 
 
+## 环境变量
+如果action任务需要配置环境变量，直接去查看AutoTask中code-dev目录中的对应配置说明即可。
+
+
 
 ## 执行的任务:
 

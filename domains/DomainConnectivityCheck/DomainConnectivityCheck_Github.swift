@@ -1,3 +1,10 @@
+//
+//  DomainConnectivityCheck_Github.swift
+//  
+//
+//  Created by kimi on 2026/9/22.
+//
+
 import Foundation
 
 #if canImport(FoundationNetworking)
@@ -18,36 +25,61 @@ import CoreFoundation
  */
 
 @main
-struct DomainConnectivityCheck{
+struct DomainConnectivityCheck_Github{
+    private static var urls:[String] = []
     
+    /**
+     读取环境变量中的配置信息 - 使用Github版时必须先执行这个方法
+     */
     public static func main(){
         print("检查站点能否正常访问...")
         
-        _ = DomainCheck()
+        setupEnvironment()
+        
+        _ = DomainCheck(urls: urls)
     }
+    
+    
+    /**
+     获取
+     */
+    private static func setupEnvironment(){
+        print("从环境变量中读取配置......")
+        
+        let DomainConnectivityCheck_urls = EnvManager.shared.getArrayString(name: "DomainConnectivityCheck_urls")
+        
+        if let DomainConnectivityCheck_urls {
+            self.urls = DomainConnectivityCheck_urls
+        }else{
+            print("❌DomainConnectivityCheck Environment - DomainConnectivityCheck_urls❌：需要校验的urls环境变量获取失败")
+        }
+    }
+    
+    
 }
 
 
 
 
-class DomainCheck{
+private class DomainCheck{
     /**
      是否打印响应数据，包括：状态码，request，response
      */
     public static var isLog = false
     
-    let ulrs = [
-        "https://cts-vapor-shulker.itunnel.cc.cd/health",
-        "https://ctsserver-shulker.itunnel.cc.cd/health"
+    var urls:[String] = [
     ]
     
     var msg:String = ""
     
-    init() {
-        msg = ""
+    init(urls:[String]) {
+        self.msg = ""
+        if urls.count > 0 {
+            self.urls = urls
+        }
+        
         start()
         push()
-        
     }
     
     
@@ -60,7 +92,6 @@ class DomainCheck{
                 print("response:\(String(describing:response))")
                 print("resultData:\(String(describing:resultData))")
             }
-
             
             if let resultData, let str = String(data: resultData, encoding: .utf8) {
                 if Self.isLog {
@@ -85,7 +116,7 @@ class DomainCheck{
     
     
     func start(){
-        for url in ulrs {
+        for url in urls {
             print("校验:\(url)")
             check(url: url)
         }
@@ -107,13 +138,11 @@ class DomainCheck{
         
         
         print("\(title)\n\(subTitle)\(body)")
-        
         print("推送通知:")
         
         
         //获取环境变量
         PushBark_Github.setupEnvironment()
-        
         PushBark_Github.bark_send(title: title, subtitle: subTitle, body: body, group: group)
         PushBark_Github.serverChan_send(title: title, short:subTitle, desp: body, tags:group)
         PushBark_Github.pushdeer_send(text: title , desp: body, type:"markdown")
@@ -133,3 +162,6 @@ class DomainCheck{
         return dateStr
     }
 }
+
+
+
