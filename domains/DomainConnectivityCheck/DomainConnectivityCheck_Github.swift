@@ -116,6 +116,7 @@ private class DomainCheck{
     
     
     func start(){
+        print("需要检查的URL数量:\(urls.count)")
         for url in urls {
             print("校验:\(url)")
             check(url: url)
