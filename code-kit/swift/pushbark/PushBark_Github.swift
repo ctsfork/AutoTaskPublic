@@ -170,7 +170,7 @@ class PushBark_Github
         站点：https://www.pushdeer.com/dev.html
      */
     @discardableResult
-    static func pushdeer_send(url:String = pushDeerAPI, text: String, desp: String? = nil, type:String? = nil) -> String {
+    static func pushdeer_send(url:String = pushDeerAPI, text: String, desp: String? = nil, type:String? = "text") -> String {
         print("PushDeer消息发送：")
         
         guard let url = URL(string: url) else {

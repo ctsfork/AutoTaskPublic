@@ -146,7 +146,7 @@ private class DomainCheck{
         PushBark_Github.setupEnvironment()
         PushBark_Github.bark_send(title: title, subtitle: subTitle, body: body, group: group)
         PushBark_Github.serverChan_send(title: title, short:subTitle, desp: body, tags:group)
-        PushBark_Github.pushdeer_send(text: title , desp: body, type:"markdown")
+        PushBark_Github.pushdeer_send(text: title , desp: body, type:"text")
     }
     
     
