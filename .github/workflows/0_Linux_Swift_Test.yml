@@ -5,8 +5,8 @@
 name: Linux Swift
 
 on:
-  push:
-    branches: [master, main]
+  # push:
+  #   branches: [master, main]
 
   #手动执行任务
   workflow_dispatch:

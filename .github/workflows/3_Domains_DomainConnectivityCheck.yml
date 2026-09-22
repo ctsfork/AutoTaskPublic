@@ -2,7 +2,7 @@
 
 
 
-name: 指定站点有效性检测
+name: DomainConnectivityCheck
 
 on:
   push:
@@ -79,11 +79,27 @@ jobs:
 
 
 
+
+      - name: "自带Swift版本测试"
+        run: |
+          set +e
+          echo "which swift:"
+          which swift
+          echo "swift -version:"
+          swift -version
+          set -e
+
+
       - name: "站点有效性检测"
         run: |
           set +e
           domains/DomainConnectivityCheck/main.sh
           set -e
+        env:
+          PUSHBARK_SC3API: ${{ secrets.PUSHBARK_SC3API }}
+          PUSHBARK_PUSHDEERAPI: ${{ secrets.PUSHBARK_PUSHDEERAPI }}
+          PUSHBARK_BARKAPIS: ${{ secrets.PUSHBARK_BARKAPIS }}
+          PUSHBARK_BARKKEYS: ${{ secrets.PUSHBARK_BARKKEYS }}
 
 
 
