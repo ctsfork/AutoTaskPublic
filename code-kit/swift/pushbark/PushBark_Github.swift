@@ -54,11 +54,12 @@ class PushBark_Github
 {
     
 //MARK: - Server酱
+    
     /**
      Server酱³请求API URL
      https://[uid].push.ft07.com/send/[SendKey].send
      这个URL是由https://sc3.ft07.com/平台生成的。
-     其中：27862和sctp278lqoqvepmq是对应的uid和sendKey
+     其中：27862和sctp2lqmq是对应的uid和sendKey
      */
     static var sc3API = ""
     
@@ -341,6 +342,7 @@ class PushBark_Github
         dict["body"] = body
         dict["group"] = group
         dict["level"] = level
+        dict["badge"] = 1
         
         
         
@@ -454,18 +456,18 @@ extension PushBark_Github{
 extension PushBark_Github{
     
     static func testServer酱3(){
-        let ret = serverChan_send(title: "主人服务器宕机了 via swift", short:"推送消息的简短描述不会在点开通知中显示", desp: "内容第一行\n\n内容第二行",  tags:"CTSServer")
+        let ret = serverChan_send(title: "主人服务器宕机了 via swift", short:"推送消息的简短描述不会在点开通知中显示", desp: "内容第一行\r\n\n内容第二行",  tags:"CTSServer")
         print(ret)
     }
     
     static func testPushDeer(){
-        let ret = pushdeer_send(text: "主人服务器宕机了 via swift", desp: "内容第一行\n\n内容第二行", type:"markdown")
+        let ret = pushdeer_send(text: "主人服务器宕机了 via swift", desp: "内容第一行\r\n\n内容第二行")
         print(ret)
     }
     
     
     static func testBark(){
-        let ret = bark_send(title: "主人服务器宕机了 via swift", subtitle: "副标题", body: "内容第一行\n\n内容第二行", group: "CTSServer")
+        let ret = bark_send(title: "主人服务器宕机了 via swift", subtitle: "副标题", body: "内容第一行\r\n\n内容第二行", group: "CTSServer")
         print(ret)
     }
     

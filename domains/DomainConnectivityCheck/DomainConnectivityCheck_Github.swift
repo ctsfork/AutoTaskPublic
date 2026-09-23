@@ -19,6 +19,14 @@ import CoreFoundation
 
 
 /**
+ 功能：
+ 检测指定域名的健康度
+ 
+ 
+ Github版:
+ 必须配置环境变量，并且需用通过setupEnvironment()方法获取并配置环境变量数据
+ 
+ 
  外部引用文件：
  - Network.swift：网络请求
  - PushBark.swift：推送通知
@@ -41,7 +49,7 @@ struct DomainConnectivityCheck_Github{
     
     
     /**
-     获取
+     读取环境变量中的配置信息 - 使用Github版时必须先执行这个方法
      */
     private static func setupEnvironment(){
         print("从环境变量中读取配置......")
@@ -105,12 +113,10 @@ private class DomainCheck{
              // && statusCode != 403
              */
             if statusCode != 200  {
-//                self.msg += "站点:\(url) 无法访问" + "\n"
-                self.msg += "站点:\(url) 状态码非200" + "\n"
+                self.msg += "站点:\(url)\n响应状态：\(statusCode)" + "\n\n"
             }
         } fail: { error, request in
-//            self.msg += "站点:\(url) 测试失败" + "\n"
-            self.msg += "站点:\(url) 无法访问" + "\n"
+            self.msg += "站点:\(url)\n响应状态：网络请求失败" + "\n\n"
         }
     }
     
@@ -131,7 +137,10 @@ private class DomainCheck{
             return;
         }
         
-        let body = "\n" + msg + "\n\n检查时间：\(currentDate())"
+        let body = msg + "\u{200B}\n检查时间：\(currentDate())"
+        
+        // Server酱的换行有些问题，这是使用了零宽字符\u{200B}占位，来处理一个\n无法换行问题。
+        let bodyServerChan = body.replacingOccurrences(of: "\n", with: "\n\n")
         
         let title = "❌Shulker.in❌ - 有服务器出现了宕机"
         let subTitle = "CTSServer服务无法访问"
@@ -142,11 +151,11 @@ private class DomainCheck{
         print("推送通知:")
         
         
-        //获取环境变量
+        //获取环境变量 - Github必须先获取环境变量
         PushBark_Github.setupEnvironment()
         PushBark_Github.bark_send(title: title, subtitle: subTitle, body: body, group: group)
-        PushBark_Github.serverChan_send(title: title, short:subTitle, desp: body, tags:group)
-        PushBark_Github.pushdeer_send(text: title , desp: body, type:"text")
+        PushBark_Github.serverChan_send(title: title, short:subTitle, desp: bodyServerChan, tags:group)
+        PushBark_Github.pushdeer_send(text: title , desp: body)
     }
     
     
@@ -158,7 +167,7 @@ private class DomainCheck{
         //固定为中国时区
         dateFormatter.locale = Locale(identifier: "en_US_POSIX")
         dateFormatter.timeZone = TimeZone(secondsFromGMT: 8 * 60 * 60)
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss SSS"
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         let dateStr = dateFormatter.string(from: Date())
         return dateStr
     }

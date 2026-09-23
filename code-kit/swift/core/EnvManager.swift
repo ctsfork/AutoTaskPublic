@@ -24,15 +24,15 @@ class EnvManager{
     static let shared:EnvManager = .init()
         
     init(){
-//        print("environment:\(ProcessInfo.processInfo.environment)")
+
     }
     
 }
 
 
-extension EnvManager{
-    
 //MARK: - 通用的环境变量值获取
+extension EnvManager{
+        
     /**
      根据环境变量名称直接从环境变量获取其值，环境变量名称 - 同时支持全大/小写和原始输入值.
      比如：
@@ -66,9 +66,8 @@ extension EnvManager{
 
 
 
-
-extension EnvManager{
 //MARK: - 获取并转换成指定的数据类型
+extension EnvManager{
     
     /**
      获取String类型的环境变量值
@@ -250,7 +249,5 @@ extension EnvManager{
         }
         return tmp
     }
-    
-    
     
 }

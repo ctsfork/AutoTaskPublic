@@ -12,10 +12,20 @@ import CoreFoundation
 
 
 /**
- 简单封装网络请求工具 - 支持Liunx平台(与具体的请求站点相关，比如请求Cloudflare托管的域名就会有请求错误问题)。
- 默认串行 - 即：每次只能执行一次请求，上一个请求完成之后才会执行下一个请求。
+ 对URLSession的简单封装，支持Linux平台，不过Linux平台下有限制，有的境外站点请求会有bug，
+ 比如请求通过Cloudflare托管的域名站点服务就会出现被源站点拒绝的错误(这是Linux 下URLSession的bug)。
+ 
+ 支持：
+ 串行：同时只能有一个请求 - 默认
+ 并发：同时支持多个请求。
+
+ 
+ 使用场景：
+ 推荐在Swift作为脚本运行，或者轻量级CLI工具中使用。
+ 
  
  PS: 该工具可用于Swift脚本运行
+ 
  
  ⚠️警告⚠️：
  1. 对URLSession的封装虽然支持在Linux平台上运行，但是由于URLSession在Linux平台的底层是使用的是libcurl，它本身就有一些bug，所以非必要在Linux上不要使用URLSession。
@@ -29,6 +39,7 @@ import CoreFoundation
  */
 class Network
 {
+    
 //MARK: -
     
     /**
@@ -62,9 +73,8 @@ class Network
         semaphore.signal()
     }
     
-    
-    
 //MARK: -
+    
     /**
      Linux平台URLSession的使用警告
      */
@@ -91,7 +101,6 @@ class Network
         
         guard let url = URL(string: url) else{
             print("Invalid URL:\(url)")
-            signal()
             return;
         }
         
@@ -99,7 +108,6 @@ class Network
         request.httpMethod = "GET"
         request.setValue(contentType, forHTTPHeaderField: "Content-Type")
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
-        
         
         
 #if canImport(FoundationNetworking)
@@ -110,8 +118,7 @@ class Network
         let session = URLSession.shared
 #endif
         
-        
-        
+
         let task = session.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 print("Error: \(error)")
@@ -120,7 +127,7 @@ class Network
                 let code = (response as! HTTPURLResponse).statusCode
                 success(data,code,request,response)
             }
-            
+    
             signal()
         }
         task.resume()
@@ -148,7 +155,6 @@ class Network
         
         guard let url = URL(string: url) else{
             print("Invalid URL:\(url)")
-            signal()
             return;
         }
         
@@ -165,18 +171,15 @@ class Network
         }
         
         
-        
 #if canImport(FoundationNetworking)
         let cfg = URLSessionConfiguration.ephemeral
         cfg.timeoutIntervalForRequest = 15
-        
         let session = URLSession(configuration: cfg)
 #else
         let session = URLSession.shared
 #endif
         
 
-        
         let task = session.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 print("Error: \(error)")
@@ -196,24 +199,4 @@ class Network
 }
 
 
-
-
-
-//MARK: - Test
-//
-////let testURL = "https://cts-vapor-shulker.itunnel.cc.cd"
-////let testURL = "https://www.baidu.com"
-//let testURL = "https://github.com"
-//
-//Network.get(url: testURL ) { resultData, statusCode, request, response in
-//    print("statusCode:\(statusCode)")
-//    if let resultData {
-//        print("resultData:\(resultData)")
-//
-//        let result = String(data: resultData, encoding: .utf8) ?? ""
-//        print("resultString:\(result)")
-//    }
-//} fail: { error, request in
-//
-//}
 
