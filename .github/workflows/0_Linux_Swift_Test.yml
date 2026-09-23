@@ -48,6 +48,12 @@ jobs:
           set +e
           domains/DomainConnectivityCheck/main.sh
           set -e
+        env:
+          PUSHBARK_SC3API: ${{ secrets.PUSHBARK_SC3API }}
+          PUSHBARK_PUSHDEERAPI: ${{ secrets.PUSHBARK_PUSHDEERAPI }}
+          PUSHBARK_BARKAPIS: ${{ secrets.PUSHBARK_BARKAPIS }}
+          PUSHBARK_BARKKEYS: ${{ secrets.PUSHBARK_BARKKEYS }}
+          DOMAINCONNECTIVITYCHECK_URLS: ${{ secrets.DOMAINCONNECTIVITYCHECK_URLS }}
 
 
 
