@@ -20,6 +20,9 @@ jobs:
   prune-old-actions:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
       - name: Delete workflow runs
         uses: yanovian/prune-old-actions@v1
         with:
