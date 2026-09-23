@@ -20,7 +20,8 @@ jobs:
   prune-old-actions:
     runs-on: ubuntu-latest
     steps:
-      - uses: yanovian/prune-old-actions@v1
+      - name: Delete workflow runs
+        uses: yanovian/prune-old-actions@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           days-ago: 0
