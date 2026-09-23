@@ -14,7 +14,14 @@ name: Delete All Workflows
 on:
   # schedule:
   #   - cron: '0 18 * * *'  # 每天 清理记录
+  
   workflow_dispatch:
+
+
+permissions:
+  actions: write
+  contents: read
+
 
 jobs:
   cleanup:
@@ -27,11 +34,9 @@ jobs:
           repository: ${{ github.repository }}
           retain_days: 0                # 0 = 不按天数保留
           keep_minimum_runs: 0          # 每个 workflow 保留 0 条
-          delete_workflow_pattern: ''   # 空 = 所有 workflow
-          delete_workflow_by_state_pattern: active,disabled_manually,disabled_inactivity,disabled_fork
-          delete_run_by_conclusion_pattern: ALL
-          dry_run: false
           
+          
+
 
       # - name: Delete Artifacts
       #   uses: geekyeggo/delete-artifact@v2
