@@ -11,9 +11,9 @@ on:
   #手动执行任务
   workflow_dispatch:
 
-  schedule:
-    #每天10:00执行一次
-    - cron: '0 10 * * *'
+  # schedule:
+  #   #每天10:00执行一次
+  #   - cron: '0 10 * * *'
     
 
 # permissions: write-all
