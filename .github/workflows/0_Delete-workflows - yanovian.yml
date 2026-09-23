@@ -27,4 +27,5 @@ jobs:
         uses: yanovian/prune-old-actions@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          days-ago: 1
+          days-ago: 0
+          keep-latest: 0
