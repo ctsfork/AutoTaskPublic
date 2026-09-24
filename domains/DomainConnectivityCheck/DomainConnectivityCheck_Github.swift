@@ -75,6 +75,7 @@ private class DomainCheck{
      */
     public static var isLog = false
     
+    /** 需要检查的url站点列表 */
     var urls:[String] = [
     ]
     

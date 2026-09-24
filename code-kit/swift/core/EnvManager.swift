@@ -154,24 +154,6 @@ extension EnvManager{
     }
     
     
-    
-    /**
-     获取JSONObject Any类型的环境变量 - 对应的环境变量值应该是一个JSON的格式的字符串。
-     */
-    func getJSONObject(name:String) -> Any?{
-        guard let string = get(name) else{
-            return nil
-        }
-        guard let data = string.data(using: .utf8) else{
-            return nil
-        }
-        guard let josn = try? JSONSerialization.jsonObject(with: data) else {
-            return nil
-        }
-        return josn
-    }
-    
-    
     /**
      获取[String:Any]格式的字典类型的环境变量 - 对应的环境变量值应该是一个JSON的格式的字符串。
      */
@@ -249,5 +231,45 @@ extension EnvManager{
         }
         return tmp
     }
+    
+    
+    
+    
+    
+    /**
+     通过JSONSerialization获取的JSON Any类型的环境变量 - 对应的环境变量值必须是一个JSON格式的字符串。
+     */
+    func getJSONObject(name:String) -> Any?{
+        guard let string = get(name) else{
+            return nil
+        }
+        guard let data = string.data(using: .utf8) else{
+            return nil
+        }
+        guard let josn = try? JSONSerialization.jsonObject(with: data) else {
+            return nil
+        }
+        return josn
+    }
+    
+    
+    
+    /**
+     通过JSONDecoder获取实现Decodable协议类型的环境变量 - 对应的环境变量值必须是一个JSON格式的字符串。
+     */
+    func getJSONDecoder<T:Decodable>(name:String) -> T?{
+        guard let string = get(name) else{
+            return nil
+        }
+        guard let data = string.data(using: .utf8) else{
+            return nil
+        }
+        let jsonDecoder = JSONDecoder()
+        guard let decoderObj = try? jsonDecoder.decode(T.self, from: data) else {
+            return nil
+        }
+        return decoderObj
+    }
+    
     
 }

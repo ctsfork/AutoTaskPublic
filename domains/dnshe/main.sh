@@ -36,7 +36,7 @@ cd "${SCRIPT_DIR}"
 
 ## 编译
 # echo "编译......"
-swiftc DnsheDomainRenewal.swift ../../code-kit/swift/pushbark/PushBark_Github.swift ../../code-kit/swift/core/*.swift -o DnsheDomainRenewal
+swiftc DnsheDomainRenewal_Github.swift ../../code-kit/swift/pushbark/PushBark_Github.swift ../../code-kit/swift/core/*.swift -o DnsheDomainRenewal
 
 
 

@@ -1,5 +1,4 @@
 import Foundation
-
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
@@ -16,7 +15,7 @@ import CoreFoundation
  比如请求通过Cloudflare托管的域名站点服务就会出现被源站点拒绝的错误(这是Linux 下URLSession的bug)。
  
  支持：
- 串行：同时只能有一个请求 - 默认
+ 串行：同时只能有一个请求 - 默认 -- ⚠️警告⚠️：这个窜行请求不能再请求中嵌套请求，否则会卡着不动，这因该与URLSession.shared有关(如果不使用shared会丢失请求)
  并发：同时支持多个请求。
 
  
@@ -39,9 +38,7 @@ import CoreFoundation
  */
 class Network
 {
-    
-//MARK: -
-    
+
     /**
      Content-Type类型自定义
      */
@@ -56,6 +53,8 @@ class Network
      */
     public static var isConcurrency = false
     
+    
+    
 //MARK: -
     
     private static let semaphore = DispatchSemaphore(value: 0)
@@ -63,6 +62,7 @@ class Network
         if isConcurrency{
             return
         }
+        print("wait")
         semaphore.wait()
     }
     
@@ -70,6 +70,7 @@ class Network
         if isConcurrency{
             return
         }
+        print("signal")
         semaphore.signal()
     }
     
@@ -93,9 +94,10 @@ class Network
      - success：请求成功回调
      - fail：请求失败回调
      */
-    public static func get(url:String,
-             success:@escaping (_ resultData:Data?, _ statusCode:Int, _ request:URLRequest, _ response:URLResponse?) -> Void,
-             fail:@escaping (_ error:Error, _ request:URLRequest) -> Void )
+    public class func get(url:String,
+                           headers:[String:Any]? = nil,
+                           success:@escaping (_ resultData:Data?, _ statusCode:Int, _ request:URLRequest, _ response:URLResponse?) -> Void,
+                           fail:@escaping (_ error:Error, _ request:URLRequest) -> Void )
     {
         linuxWarning()
         
@@ -110,6 +112,15 @@ class Network
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         
         
+        /** 配置headers */
+        if let headers {
+            for (name, value) in headers{
+                request.setValue((value as! String), forHTTPHeaderField: name)
+            }
+        }
+        
+        
+
 #if canImport(FoundationNetworking)
         let cfg = URLSessionConfiguration.ephemeral
         cfg.timeoutIntervalForRequest = 15
@@ -119,6 +130,7 @@ class Network
 #endif
         
 
+        
         let task = session.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 print("Error: \(error)")
@@ -146,10 +158,11 @@ class Network
      - success：请求成功回调
      - fail：请求失败回调
      */
-    public static func post(url:String,
-             par:[String:Any]?,
-             success:@escaping (_ resultData:Data?, _ statusCode:Int, _ request:URLRequest, _ response:URLResponse?) -> Void,
-             fail:@escaping (_ error:Error, _ request:URLRequest) -> Void )
+    public class func post(url:String,
+                            par:[String:Any]?,
+                            headers:[String:Any]? = nil,
+                            success:@escaping (_ resultData:Data?, _ statusCode:Int, _ request:URLRequest, _ response:URLResponse?) -> Void,
+                            fail:@escaping (_ error:Error, _ request:URLRequest) -> Void )
     {
         linuxWarning()
         
@@ -162,6 +175,16 @@ class Network
         request.httpMethod = "POST"
         request.setValue(contentType, forHTTPHeaderField: "Content-Type")
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        
+        
+        /** 配置headers */
+        if let headers {
+            for (name, value) in headers{
+                request.setValue((value as! String), forHTTPHeaderField: name)
+            }
+        }
+        
+        
 
         // 添加Body参数
         if let dict = par {
@@ -178,6 +201,7 @@ class Network
 #else
         let session = URLSession.shared
 #endif
+
         
 
         let task = session.dataTask(with: request) { (data, response, error) in
@@ -194,8 +218,22 @@ class Network
         task.resume()
         
         wait()
+        
+        
+        
+//        //Test
+//        requester.request(request) { resultData, statusCode, request, response in
+//            success(resultData, statusCode, request, response)
+//        } fail: { error, request in
+//            fail(error, request)
+//        }
+        
     }
 
+    
+//    static let requester = SerialURLSessionRequester()
+    
+    
 }
 
 

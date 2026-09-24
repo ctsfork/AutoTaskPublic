@@ -17,6 +17,42 @@
 
 
 
+
+## PushBark
+在任意Swift脚本中如果需要推送通知，则需要将PushBark.swift引入，它提供了多个平台的消息推送接口服务。 \
+\
+封装了几个平台的消息通知发送服务，其中包括：
+- Bark：https://github.com/Finb/Bark
+- Server酱：https://sc3.ft07.com/client
+- PushDeer：https://www.pushdeer.com/product.html
+
+
+**Giuhub**版本环境变量配置:
+```
+//Server酱³请求API URL - 其中包括完整的SendKey
+//这个URL是由https://sc3.ft07.com/平台生成的。
+PushBark_sc3API=
+
+
+//PushDeer消息发送API URL，其中的pushkey在PushDeer App中获取。
+PushBark_pushDeerAPI=
+
+
+//Bark消息发送API URL - key（在Bark App中获取）放在Body参数中。并且可以推送多个设备。
+PushBark_barkAPIs=
+//推送设备的key数组
+PushBark_barkKeys=
+```
+⚠️注意⚠️：\
+如果环境变量需要形如字典，数组等数据时，需要以JSON字符串的方式配置环境变量；\
+像普通的：字符串，数字，Bool类型直接配置环境变量皆可，配置Bool值时支持false/true和数字(0解析为false，非0解析为true)。
+
+
+
+
+
+
+##
 ## 执行的任务:
 
 
