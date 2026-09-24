@@ -62,7 +62,6 @@ class Network
         if isConcurrency{
             return
         }
-        print("wait")
         semaphore.wait()
     }
     
@@ -70,7 +69,6 @@ class Network
         if isConcurrency{
             return
         }
-        print("signal")
         semaphore.signal()
     }
     
