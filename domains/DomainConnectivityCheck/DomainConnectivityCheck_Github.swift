@@ -76,10 +76,10 @@ private class DomainCheck{
     public static var isLog = false
     
     /** 需要检查的url站点列表 */
-    var urls:[String] = [
+    private var urls:[String] = [
     ]
     
-    var msg:String = ""
+    private var msg:String = ""
     
     init(urls:[String]) {
         self.msg = ""
@@ -138,10 +138,9 @@ private class DomainCheck{
             return;
         }
         
+        // 这是使用了零宽字符\u{200B}占位，来处理Server酱中一个\n无法换行问题。
         let body = msg + "\u{200B}\n检查时间：\(currentDate())"
         
-        // Server酱的换行有些问题，这是使用了零宽字符\u{200B}占位，来处理一个\n无法换行问题。
-        let bodyServerChan = body.replacingOccurrences(of: "\n", with: "\n\n")
         
         let title = "❌Shulker.in❌ - 有服务器出现了宕机"
         let subTitle = "CTSServer服务无法访问"
@@ -151,12 +150,9 @@ private class DomainCheck{
         print("\(title)\n\(subTitle)\(body)")
         print("推送通知:")
         
-        
-        //获取环境变量 - Github必须先获取环境变量
-        PushBark_Github.setupEnvironment()
-        PushBark_Github.bark_send(title: title, subtitle: subTitle, body: body, group: group)
-        PushBark_Github.serverChan_send(title: title, short:subTitle, desp: bodyServerChan, tags:group)
-        PushBark_Github.pushdeer_send(text: title , desp: body)
+                
+        PushBark_Github.pushAll(title: title, subTitle: subTitle, body: body, group: group)
+
     }
     
     

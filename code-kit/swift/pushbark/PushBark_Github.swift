@@ -61,14 +61,14 @@ class PushBark_Github
      这个URL是由https://sc3.ft07.com/平台生成的。
      其中：27862和sctp2lqmq是对应的uid和sendKey
      */
-    static var sc3API = ""
+    private static var sc3API = ""
     
     /**
      Server酱Turbo请求API URL
      https://sctapi.ftqq.com/<SendKey>.send
      SENDKEY: 由https://sct.ftqq.com/平台生成
      */
-    static var scTurboAPI = ""
+    private static var scTurboAPI = ""
     
     
     
@@ -153,7 +153,7 @@ class PushBark_Github
     /**
      PushDeer消息发送API URL，其中的pushkey在PushDeer App中获取。
      */
-    static var pushDeerAPI = ""
+    private static var pushDeerAPI = ""
     
     /**
      功能：PushDeer推送服务，接收消息时需要再手机上安装[PushDeer App] - 同时支持iOS/Android；但是Android已经停止更新，iOS版也比较老旧了。
@@ -238,7 +238,7 @@ class PushBark_Github
     /**
      Bark消息发送API URL - key（在Bark App中获取）直接放在URL中，并且只能推送一个设备。
      */
-    static var barkAPI = ""
+    private static var barkAPI = ""
     
     /**
      Bark消息发送API URL - key（在Bark App中获取）放在Body参数中。并且可以推送多个设备。
@@ -246,9 +246,9 @@ class PushBark_Github
      - device_key：只推送一个设备
      - device_keys：推送多个设备，公共服务器一次最多 10 个设备，自建服务器无上限。
      */
-    static var barkAPIs = ""
+    private static var barkAPIs = ""
     /** 推送设备的key数组 */
-    static var barkKeys = [
+    private static var barkKeys = [
         ""
     ]
     
@@ -435,13 +435,45 @@ extension PushBark_Github{
     /**
      打印配置环境变量后的数据
      */
-    static func printEnvironment(){
+    private  static func printEnvironment(){
         print("self.sc3API:\(self.sc3API)")
         print("self.pushDeerAPI:\(self.pushDeerAPI)")
         print("self.barkAPIs:\(self.barkAPIs)")
         print("self.barkKeys:\(self.barkKeys)")
 
     }
+    
+}
+
+
+
+
+//MARK: -
+extension PushBark_Github{
+    
+    /**
+     同时推送PushBark支持的所有通知
+     - title: 标题
+     - subtitle: 子标题
+     - body: 长内容
+     - group: 分组
+     - type: 通知分组
+     */
+    static func pushAll(title:String, subTitle:String?, body:String, group:String?, type:String? = nil){
+        //GitHub版必须配置setupEnvironment
+        setupEnvironment()
+        
+        
+        // Server酱的换行有些问题，这是使用了零宽字符\u{200B}占位，来处理一个\n无法换行问题。
+        let bodyServerChan = body.replacingOccurrences(of: "\n", with: "\n\n")
+        
+        
+        //推送
+        bark_send(title: title, subtitle: subTitle, body: body, group: group)
+        serverChan_send(title: title, short:subTitle, desp: bodyServerChan, tags:group)
+        pushdeer_send(text: title , desp: body)
+    }
+    
     
 }
 

@@ -78,7 +78,7 @@ private class DomainRenewal{
      key: 对应配置中每个domain的用户信息
      value: 具体的提示消息
      */
-    var msgDict:[String:String] = [:]
+    private var msgDict:[String:String] = [:]
     
     
     
@@ -277,7 +277,7 @@ extension DomainRenewal{
         let keys = self.msgDict.keys.sorted()
         for k in keys {
             let v = self.msgDict[k] ?? ""
-            msg += "用户:\(k):\n\(v)"
+            msg += "用户: \(k)\n\(v)"
             msg += "\n"
         }
         
@@ -289,14 +289,10 @@ extension DomainRenewal{
         
         
         let body = msg + "\n检查时间：\(currentDate())"
-        
-        // Server酱的换行有些问题，这是使用了零宽字符\u{200B}占位，来处理一个\n无法换行问题。
-        let bodyServerChan = body.replacingOccurrences(of: "\n", with: "\n\n")
-        
+                
         let title = "✅dnshe.com✅ - 免费域名定时延期"
         let subTitle = ""
         let group = "DNSHE"
-        
         
         
         print("推送通知:")
@@ -304,11 +300,7 @@ extension DomainRenewal{
         print("")
         
         
-        //获取环境变量 - Github必须先获取环境变量
-        PushBark_Github.setupEnvironment()
-        PushBark_Github.bark_send(title: title, subtitle: subTitle, body: body, group: group)
-        PushBark_Github.serverChan_send(title: title, short:subTitle, desp: bodyServerChan, tags:group)
-        PushBark_Github.pushdeer_send(text: title , desp: body)
+        PushBark_Github.pushAll(title: title, subTitle: subTitle, body: body, group: group)
         
     }
     

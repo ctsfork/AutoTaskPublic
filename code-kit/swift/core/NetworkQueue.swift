@@ -243,7 +243,7 @@ extension NetworkQueue{
 
 
 //MARK: - 重写SupportSerialOperation，让其控制URLSession  让其能够自由控制串行/并发操作
-private class URLSessionTaskOperation:SupportSerialOperationV1{
+private class URLSessionTaskOperation:SupportSerialOperationV1, @unchecked Sendable {
     //用于在普通方法中调用async的Task
     private var task:URLSessionDataTask?
 
@@ -349,7 +349,7 @@ private class URLSessionTaskOperation:SupportSerialOperationV1{
 
 
 //MARK: - 重写Operation让其能够手动控制Operation的状态
-private  class SupportSerialOperationV1: Operation{
+private  class SupportSerialOperationV1: Operation, @unchecked Sendable {
     // MARK: - State
     private enum State {
         case ready
@@ -485,7 +485,7 @@ private  class SupportSerialOperationV1: Operation{
 
 
 
-class SupportSerialOperationV2:Operation{
+class SupportSerialOperationV2:Operation, @unchecked Sendable {
     private let stateQueue = DispatchQueue(label: "AsyncOperation.rw.state", attributes: .concurrent)
     
     override var isAsynchronous: Bool{
