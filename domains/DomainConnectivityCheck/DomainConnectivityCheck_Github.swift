@@ -114,10 +114,10 @@ private class DomainCheck{
              // && statusCode != 403
              */
             if statusCode != 200  {
-                self.msg += "站点:\(url)\n响应状态：\(statusCode)" + "\n\n"
+                self.msg += "站点：\(url)\n响应状态：\(statusCode)" + "\n\n"
             }
         } fail: { error, request in
-            self.msg += "站点:\(url)\n响应状态：网络请求失败" + "\n\n"
+            self.msg += "站点：\(url)\n响应状态：网络请求失败" + "\n\n"
         }
     }
     
@@ -131,6 +131,16 @@ private class DomainCheck{
         print("\n")
     }
     
+    private var platform:String{
+    #if os(macOS)
+        let platform = "macOS"
+    #elseif os(Linux)
+        let platform = "Linux"
+    #else
+        let platform = "Other"
+    #endif
+        return platform
+    }
     
     func push(){
         if msg.isEmpty{
@@ -139,7 +149,7 @@ private class DomainCheck{
         }
         
         // 这是使用了零宽字符\u{200B}占位，来处理Server酱中一个\n无法换行问题。
-        let body = msg + "\u{200B}\n检查时间：\(currentDate())"
+        let body = msg + "\u{200B}\n运行环境：\(platform)\n检查时间：\(currentDate())"
         
         
         let title = "❌Shulker.in❌ - 有服务器出现了宕机"

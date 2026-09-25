@@ -2,7 +2,7 @@
 
 
 
-name: DomainConnectivityCheck
+name: Domain Connectivity Check
 
 on:
   # push:

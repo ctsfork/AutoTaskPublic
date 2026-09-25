@@ -268,6 +268,16 @@ extension DomainRenewal{
         }
     }
     
+    private var platform:String{
+    #if os(macOS)
+        let platform = "macOS"
+    #elseif os(Linux)
+        let platform = "Linux"
+    #else
+        let platform = "Other"
+    #endif
+        return platform
+    }
     
     /**
      推送通知
@@ -288,7 +298,8 @@ extension DomainRenewal{
         }
         
         
-        let body = msg + "\n检查时间：\(currentDate())"
+        // 这是使用了零宽字符\u{200B}占位，来处理Server酱中一个\n无法换行问题。
+        let body = msg + "\u{200B}\n运行环境：\(platform)\n检查时间：\(currentDate())"
                 
         let title = "✅dnshe.com✅ - 免费域名定时延期"
         let subTitle = ""
