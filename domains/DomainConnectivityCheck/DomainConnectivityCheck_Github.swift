@@ -149,7 +149,7 @@ private class DomainCheck{
         }
         
         // 这是使用了零宽字符\u{200B}占位，来处理Server酱中一个\n无法换行问题。
-        let body = msg + "\u{200B}\n运行环境：\(platform)\n检查时间：\(currentDate())"
+        let body = msg + "\u{200B}\n运行环境：\(platform)\n运行时间：\(currentDate())"
         
         
         let title = "❌Shulker.in❌ - 有服务器出现了宕机"
