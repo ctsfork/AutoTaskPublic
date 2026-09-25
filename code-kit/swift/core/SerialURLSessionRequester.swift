@@ -6,6 +6,12 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+#if canImport(CoreFoundation)
+import CoreFoundation
+#endif
 
 
 
