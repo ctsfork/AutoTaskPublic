@@ -6,7 +6,6 @@
 //
 
 import Foundation
-
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
@@ -24,6 +23,7 @@ import CoreFoundation
  - Server酱³：支持iOS/Android平台，并且持续更新。
  - Server酱Turbo：只要集成其它平台，比如默认就是微信公众号接收通知。
  - PushDeer：支持iOS/Android平台，但是代码已经不更新了。
+ - PushGo：支持iOS/Android平台，并且持续更新。但是Android平台通知时效性比较差，除非APP一直保活。
  
  
  ⚠️关于Github版本：
@@ -38,14 +38,15 @@ import CoreFoundation
      - https://apps.apple.com/us/app/bark-custom-notifications/id1403753865
  2. Server酱：https://sc3.ft07.com/client
  3. PushDeer：https://www.pushdeer.com/product.html
+ 4. PushGo：https://pushgo.dev
  
  
  通知接送强度优先级：
- Bark > PushDeer > Server酱
+ Bark > Server酱 > PushGo > PushDeer
  
  
  推荐：
- 在发送推送服务时，推荐同时推送到这三个平台。
+ 在发送推送服务时，推荐同时推送到这几个平台。
  
  
  PS: 该工具可用于Swift脚本运行
@@ -380,6 +381,104 @@ class PushBark_Github
         return result
     }
     
+    
+    
+
+    
+    
+//MARK: - PushGo
+    /**
+     Push Go消息发送API URL
+     */
+    private static var pushGoAPI = ""
+    /**
+     Push Go消息发送的通道ID，一个客户端可以被多个设备绑定
+     */
+    private static var pushGoChannelID = ""
+    /**
+     Push Go消息发送的通道密码
+     */
+    private static var pushGoPassword = ""
+    
+    
+    
+    /**
+     功能：PushGo 推送服务，接收消息时需要再手机上安装[PushGo App] - 支持iOS/Android，并且App在持续更新。
+     PushGo消息发送是免费的，但是Android版的消息接收时效性比较差，并且需要App保活才能保证设备能够及时收到通知。
+
+     
+     主要参数：
+     channel_id：通道ID，可被多个设备绑定。比如需要多个设备同时接收，只需要将订阅通道即可。
+     password：通道密码
+     
+     title：消息标题
+     body：消息内容
+     
+     severity：消息提示等级。
+        - normal：常规消息通知，表现叮咚一声响
+        - high：高优先级的消息通知，表现通知声音持续响一段时间。
+        - critical：警告级的消息通知，表现通知为警告铃声
+     
+     url：消息URL链接
+     images：消息图片
+        - 示例："images": ["https://example.com/snapshot.jpg"]
+     
+     tags：消息分组，
+        - 示例："tags": ["nas", "disk"]
+     */
+    @discardableResult
+    static func pushgo_send(ApiURL:String = pushGoAPI, title: String,  body: String, tags:[String]? = nil, severity:String? = "critical" ) -> String {
+        print("PushGo消息发送：")
+        
+        guard let url = URL(string: ApiURL) else {
+            print("PushGo Invalid URL")
+            return ""
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        //body参数
+        var dict:[String:Any] = [
+            "channel_id":pushGoChannelID,
+            "password":pushGoPassword,
+        ]
+        dict["title"] = title
+        dict["body"] = body
+        dict["severity"] = severity
+        dict["tags"] = tags
+        
+        
+        if let jsonData = try? JSONSerialization.data(withJSONObject: dict){
+            request.httpBody = jsonData
+        }
+        
+        let semaphore = DispatchSemaphore(value: 0)
+        var result = ""
+        
+#if canImport(FoundationNetworking)
+        let cfg = URLSessionConfiguration.ephemeral
+        cfg.timeoutIntervalForRequest = 15
+        let session = URLSession(configuration: cfg)
+#else
+        let session = URLSession.shared
+#endif
+        
+        let task = session.dataTask(with: request) { (data, response, error) in
+            if let error = error {
+                print("PushGo Error: \(error)")
+            } else if let data = data {
+                result = String(data: data, encoding: .utf8) ?? ""
+            }
+            semaphore.signal()
+        }
+        task.resume()
+        semaphore.wait()
+        return result
+    }
+    
+    
 }
 
 
@@ -402,6 +501,11 @@ extension PushBark_Github{
         // Bark
         let PushBark_barkAPIs = EnvManager.shared.getString(name: "PushBark_barkAPIs")
         let PushBark_barkKeys = EnvManager.shared.getArrayString(name: "PushBark_barkKeys")
+        
+        // PushGo
+        let PushBark_pushGoAPI = EnvManager.shared.getString(name: "PushBark_pushGoAPI")
+        let PushBark_pushGoChannelID = EnvManager.shared.getString(name: "PushBark_pushGoChannelID")
+        let PushBark_pushGoPassword = EnvManager.shared.getString(name: "PushBark_pushGoPassword")
         
         
         
@@ -429,18 +533,40 @@ extension PushBark_Github{
             print("❌PushBark Environment - PushBark_barkKeys❌：Bark 推送设备keys数组获取失败")
         }
         
+        
+        if let PushBark_pushGoAPI {
+            self.pushGoAPI = PushBark_pushGoAPI
+        }else{
+            print("❌PushBark Environment - PushBark_pushGoAPI❌：PushGo 请求API获取失败")
+        }
+        if let PushBark_pushGoChannelID {
+            self.pushGoChannelID = PushBark_pushGoChannelID
+        }else{
+            print("❌PushBark Environment - PushBark_pushGoChannelID❌：PushGo 请求通道ID获取失败")
+        }
+        if let PushBark_pushGoPassword {
+            self.pushGoPassword = PushBark_pushGoPassword
+        }else{
+            print("❌PushBark Environment - PushBark_pushGoPassword❌：PushGo 请求通道密码获取失败")
+        }
+        
     }
     
     
     /**
      打印配置环境变量后的数据
      */
-    private  static func printEnvironment(){
+    static func printEnvironment(){
         print("self.sc3API:\(self.sc3API)")
+        
         print("self.pushDeerAPI:\(self.pushDeerAPI)")
+        
         print("self.barkAPIs:\(self.barkAPIs)")
         print("self.barkKeys:\(self.barkKeys)")
-
+        
+        print("self.pushGoAPI:\(self.pushGoAPI)")
+        print("self.pushGoChannelID:\(self.pushGoChannelID)")
+        print("self.pushGoPassword:\(self.pushGoPassword)")
     }
     
 }
@@ -472,6 +598,7 @@ extension PushBark_Github{
         bark_send(title: title, subtitle: subTitle, body: body, group: group)
         serverChan_send(title: title, short:subTitle, desp: bodyServerChan, tags:group)
         pushdeer_send(text: title , desp: body)
+        pushgo_send(title: title, body: body)
     }
     
     
@@ -487,31 +614,45 @@ extension PushBark_Github{
 //MARK: - Test
 extension PushBark_Github{
     
-    static func testServer酱3(){
-        let ret = serverChan_send(title: "主人服务器宕机了 via swift", short:"推送消息的简短描述不会在点开通知中显示", desp: "内容第一行\r\n\n内容第二行",  tags:"CTSServer")
+    /**
+     测试所有通知
+     */
+    static func testPush(){
+        testServer酱3()
+        testPushDeer()
+        testBark()
+        testPushGo()
+    }
+    
+    
+    
+    private static func testServer酱3(){
+        let ret = serverChan_send(title: "Server酱 主人服务器宕机了 via swift", short:"推送消息的简短描述不会在点开通知中显示", desp: "内容第一行\n\n内容第二行",  tags:"CTSServer")
         print(ret)
     }
     
-    static func testPushDeer(){
-        let ret = pushdeer_send(text: "主人服务器宕机了 via swift", desp: "内容第一行\r\n\n内容第二行")
+    private static func testPushDeer(){
+        let ret = pushdeer_send(text: "PushDeer 主人服务器宕机了 via swift", desp: "内容第一行\n\n内容第二行")
         print(ret)
     }
     
     
-    static func testBark(){
-        let ret = bark_send(title: "主人服务器宕机了 via swift", subtitle: "副标题", body: "内容第一行\r\n\n内容第二行", group: "CTSServer")
+    private static func testBark(){
+        let ret = bark_send(title: "Bark 主人服务器宕机了 via swift", subtitle: "副标题", body: "内容第一行\n\n内容第二行", group: "CTSServer")
         print(ret)
     }
     
+    private static func testPushGo(){
+        let ret = pushgo_send(title: "PushGo 主人服务器宕机了 via swift", body: "内容第一行\n\n内容第二行")
+        print(ret)
+    }
 }
 
 
 
 
 
-//PushBark_Github.testServer酱3()
-//PushBark_Github.testPushDeer()
-//PushBark_Github.testBark()
+//PushBark.test()
 
 
 
